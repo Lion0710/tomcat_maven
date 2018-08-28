@@ -1,0 +1,9 @@
+web:
+ image: 10.31.57.177/lixiao/service:1.0
+ stdin_open: true
+ tty: true
+ ports:
+ - 9999:8080/tcp
+ labels:
+    io.rancher.container.pull_image: always
+    clcos.user.name: ${CLCOS_USER_NAME}

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+ http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd"
+>
+	<description>单数据源配置方案</description>
+ <!-- jdbc.properties文件路径  --> 
+    <bean   class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"> 
+        <property name="locations" >
+			<list>
+				<value>classpath:jdbc.properties</value>
+			</list>     	
+        </property> 
+    </bean> 
+    <!-- 配置数据源 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" 
+    	  init-method="init" destroy-method="close">
+		<!-- 数据库基本信息配置 -->
+		<property name="driverClassName" value="${mysql.driver}" />
+		<property name="url" value="${mysql.url}" />
+		<property name="username" value="${mysql.user}" />
+		<property name="password" value="${mysql.password}" />		
+		<!-- 初始化连接数量 -->
+		<property name="initialSize" value="${druid.initialSize}" />
+		<!-- 最大并发连接数 -->
+		<property name="maxActive" value="${druid.maxActive}" />
+		<!-- 最大空闲连接数 -->
+		<property name="maxIdle" value="${druid.maxIdle}" />
+		<!-- 最小空闲连接数 -->
+		<property name="minIdle" value="${druid.minIdle}" />
+		<!-- 配置获取连接等待超时的时间 -->		
+		<property name="maxWait" value="${druid.maxWait}" />
+		<!-- 超过时间限制是否回收 -->
+		<property name="removeAbandoned" value="${druid.removeAbandoned}" />
+		<!-- 超过时间限制多长； -->
+		<property name="removeAbandonedTimeout" value="${druid.removeAbandonedTimeout}" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}" />
+		<!-- 用来检测连接是否有效的sql，要求是一个查询语句-->	
+		<property name="validationQuery" value="${druid.oracle.validationQuery}" />
+		<!-- 申请连接的时候检测 -->
+		<property name="testWhileIdle" value="${druid.testWhileIdle}" />
+		<!-- 申请连接时执行validationQuery检测连接是否有效，配置为true会降低性能 -->
+		<property name="testOnBorrow" value="${druid.testOnBorrow}" />
+		<!-- 归还连接时执行validationQuery检测连接是否有效，配置为true会降低性能  -->
+		<property name="testOnReturn" value="${druid.testOnReturn}" />
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<property name="poolPreparedStatements" value="${druid.poolPreparedStatements}" />		
+		<property name="maxPoolPreparedStatementPerConnectionSize" value="${druid.maxPoolPreparedStatementPerConnectionSize}" />
+		<!--属性类型是字符串，通过别名的方式配置扩展插件，常用的插件有：  				
+				监控统计用的filter:stat
+				日志用的filter:log4j
+ 				防御SQL注入的filter:wall -->
+		<property name="filters" value="${druid.filters}" />		
+	</bean>
+    
+    <!-- MyBatis sqlSessionFactory 配置 mybatis--> 
+    <bean id="webSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"> 
+        <property name="mapperLocations" >
+        	<list>
+				<value>classpath:com/zhangkailei/songta/mapper/*/*Mapper.xml</value>		
+        	</list>
+        </property>
+        <property name="dataSource" ref="dataSource" />
+         <!-- 自动扫描实体对象加入到typealiase中 -->
+       <property name="typeAliasesPackage" value="com.zhangkailei.songta.example.vo"/>
+       <property name="typeAliases" >
+        	<array>
+        		<value>com.zhangkailei.songta.common.Page</value>
+        	</array>
+        </property>
+        <!-- 添加mybatis拦截器插件  -->
+        <property name="plugins">
+        	<list>
+        		<ref bean="pageInterceptor"/>
+        	</list>
+        </property>
+    </bean>
+    
+    <!-- mybatis分页插件 -->
+    <bean id="pageInterceptor" class="com.zhangkailei.songta.common.PageInterceptor">
+    	<!-- 指定数据库类型，根据类型选择方言 mysql和oracle -->
+    	<property name="databaseType" value="mysql"></property>
+    </bean> 
+    
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 -->  
+    <bean id="webMapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+    	<!-- 加载rbac模型dao层； -->
+         <property name="basePackage" value="com.zhangkailei.songta.example.dao" />
+        <property name="sqlSessionFactoryBeanName" value="webSqlSessionFactory"/> 
+    </bean>  
+    
+     <!-- 事务控制 --> 
+    <bean id="webTransactionManager" 
+        class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> 
+        <property name="dataSource" ref="dataSource" /> 
+    </bean> 
+    <tx:advice id="webTxAdvice" transaction-manager="webTransactionManager"> 
+        <tx:attributes> 
+            <tx:method name="insert*" propagation="REQUIRED" read-only="false"   rollback-for="java.lang.Exception"/> 
+            <tx:method name="add*" propagation="REQUIRED" read-only="false"   rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" propagation="REQUIRED" read-only="false"   rollback-for="java.lang.Exception"/>
+            <tx:method name="modify*" propagation="REQUIRED" read-only="false"   rollback-for="java.lang.Exception"/>
+            <tx:method name="remove*" propagation="REQUIRED" read-only="false"   rollback-for="java.lang.Exception"/>
+        </tx:attributes> 
+    </tx:advice> 
+    
+    <aop:config> 
+    	<aop:pointcut id="webPointcut" expression="execution(* com.zhangkailei.songta.example.business.impl.*.*(..))" />
+    	<aop:advisor pointcut-ref="webPointcut" advice-ref="webTxAdvice" />
+    </aop:config>
+    <!-- id构建策略对象 -->
+    <bean id="uuidGenerator" class="com.zhangkailei.songta.common.UUIDGenerator"/>
+    
+</beans>

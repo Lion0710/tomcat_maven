@@ -1,0 +1,111 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.zhangkaillei.songta</groupId>
+	<artifactId>tomcat_maven</artifactId>
+	<version>1.0.0</version>
+
+	<packaging>war</packaging>
+
+	<name>松塔平台</name>
+	<description>组件化、可配置</description>
+	<url>http://maven.apache.org</url>
+
+	
+	<!-- spring核心包 -->
+	<dependencies>
+		
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>		
+	</dependencies>
+	
+	<!-- 组件私服地址 -->	
+	<repositories>
+		<repository>
+			<id>local_nexus</id>
+			<name>local_nexus</name>
+			<url>http://10.31.22.209:8081/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	<!-- 插件私服地址 -->
+	<pluginRepositories>
+		<pluginRepository>
+			<id>local_nexus</id>
+			<name>local_nexus</name>
+			<url>http://10.31.22.209:8081/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+	
+	<build>
+		<directory>target</directory><!-- 这是打包的文件的路径。默认是该工程的根目录。 -->
+		<finalName>tomcat_maven</finalName><!--生成的目标文件名 -->
+		<plugins>
+			<!-- tomcat7 的插件 -->
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<!-- 将项目部署到外部tomcat中 start -->
+					<!-- 注意此处的url -->
+					<!-- <url>http://localhost:8080/manager/text</url> <server>tomcat7server</server> 
+						此处的名字必须和setting.xml中配置的ID一致 <username>admin</username> <password>admin</password> 
+						<path>/web</path> --><!-- 此处的名字是项目发布的工程名 -->
+					<!-- 将项目部署到外部tomcat中 end -->
+
+					<!-- 直接使用tomcat插件部署 -->
+					<port>8080</port>
+					<path>/tomcat_maven</path>
+					<uriEncoding>UTF-8</uriEncoding>
+					<finalName>tomcat_maven</finalName>
+					<server>tomcat7</server>
+				</configuration>
+			</plugin>
+			<!-- 设定maven编译jdk版本 编码格式 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<!-- 打包源码 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+
+</project>

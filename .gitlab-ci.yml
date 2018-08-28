@@ -1,0 +1,49 @@
+stages:
+  - build
+  - test
+  - package
+  - commit
+  
+cache:
+  paths:
+  - target/*.war
+  
+job_build:
+  stage: build
+  script:
+    - mvn clean compile
+  when: manual
+  only:
+    - master
+  tags:
+    - local-tag1
+
+job_test:
+  stage: test
+  script:
+    - mvn test
+  when: manual
+  only:
+    - master
+  tags:
+    - local-tag1
+    
+job_package:
+  stage: package
+  script:
+    - mvn package
+  when: manual
+  only:
+    - master
+  tags:
+    - local-tag1
+    
+job_commit:
+  stage: commit
+  script:
+    - docker build -t 10.31.57.177/zhangkailei/gitci_tomat_test:1.0 .
+  when: manual
+  only:
+    - master
+  tags:
+    - local-tag1

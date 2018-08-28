@@ -24,34 +24,6 @@
 		</dependency>		
 	</dependencies>
 	
-	<!-- 组件私服地址 -->	
-	<repositories>
-		<repository>
-			<id>local_nexus</id>
-			<name>local_nexus</name>
-			<url>http://10.31.22.209:8081/nexus/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-	<!-- 插件私服地址 -->
-	<pluginRepositories>
-		<pluginRepository>
-			<id>local_nexus</id>
-			<name>local_nexus</name>
-			<url>http://10.31.22.209:8081/nexus/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
 	
 	<build>
 		<directory>target</directory><!-- 这是打包的文件的路径。默认是该工程的根目录。 -->
